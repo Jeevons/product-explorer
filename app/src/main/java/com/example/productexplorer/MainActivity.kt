@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -77,9 +78,12 @@ fun ProductDetailScreen(
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Text(text = product.title)
-        Text(text = product.brand)
-        Text(text = product.category)
+        ProductHeader(
+            title = product.title,
+            brand = product.brand,
+            category = product.category
+        )
+
         Text(text = "${product.price} €")
         Text(text = product.description)
 
@@ -96,6 +100,30 @@ fun ProductDetailScreenPreview() {
         ProductDetailScreen(
             product = sampleProduct(),
             onAddToCartClick = {}
+        )
+    }
+}
+
+// En-tete : nom, marque et categorie
+@Composable
+fun ProductHeader(
+    title: String,
+    brand: String,
+    category: String,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.headlineSmall
+        )
+        Text(
+            text = brand,
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = category,
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
