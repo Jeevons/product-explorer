@@ -19,9 +19,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,6 +41,19 @@ fun ProductCatalogScreen(
     onProductClick: (ProductUi) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var searchQuery by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    // La liste est recalculee quand les produits ou la recherche changent.
+    val filteredProducts = remember(products, searchQuery) {
+        products.filter { product ->
+            product.title.contains(searchQuery, ignoreCase = true) ||
+                    product.brand.contains(searchQuery, ignoreCase = true) ||
+                    product.category.contains(searchQuery, ignoreCase = true)
+        }
+    }
+
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -50,6 +69,17 @@ fun ProductCatalogScreen(
             )
         }
         item {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { newValue ->
+                    searchQuery = newValue
+                },
+                label = { Text(text = "Rechercher un produit") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item {
             Text(
                 text = "Une sélection tech et maison pour le quotidien.",
                 color = MaterialTheme.colorScheme.onBackground,
@@ -60,9 +90,19 @@ fun ProductCatalogScreen(
             CategoryRow(categories = sampleCategories())
         }
 
+        if (filteredProducts.isEmpty()) {
+            item {
+                Text(
+                    text = "Aucun produit trouvé. Essayez un autre mot.",
+                    color = MaterialTheme.colorScheme.onBackground,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+
         // key : chaque produit garde la meme identite meme si la liste change
         items(
-            items = products,
+            items = filteredProducts,
             key = { product -> product.id }
         ) { product ->
             ProductListItem(

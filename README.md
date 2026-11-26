@@ -1,9 +1,9 @@
 # Product Explorer
 
-Application Android réalisée avec Jetpack Compose pour les TP 4 à 7.
+Application Android réalisée avec Jetpack Compose pour les TP 4 à 8 (TP 8 en cours).
 Les cinq produits sont des exemples fictifs, écrits directement en Kotlin. Il n'y a pas de récupération sur Internet.
 
-Au lancement, l'application affiche le catalogue du TP 7. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
+Au lancement, l'application affiche le catalogue avec la recherche du TP 8. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
 Les boutons transmettent un callback au parent ; la navigation et les actions métier seront ajoutées dans les prochains TP.
 
 ## TP 4 : détail d'un produit
@@ -87,3 +87,18 @@ Le mode interactif des previews permet de faire défiler les écrans.
 
 <img src="images/accueil.png" alt="Accueil Product Explorer" width="300" />
 <img src="images/detail.png" alt="Détail d'un produit" width="300" />
+
+## TP 8 : catalogue interactif (en cours)
+
+### Étape 1 : recherche locale
+
+Le catalogue propose un champ `OutlinedTextField` pour chercher dans le nom, la marque ou la catégorie, sans tenir compte des majuscules.
+
+- `mutableStateOf` crée l'état du texte saisi.
+- `rememberSaveable` conserve ce texte lors d'une recréation de l'écran, par exemple une rotation.
+- `remember(products, searchQuery)` recalcule la liste filtrée quand ses dépendances changent.
+- La `LazyColumn` affiche maintenant `filteredProducts`.
+
+Une recherche vide affiche tous les produits. Si aucun produit ne correspond, un message invite à essayer un autre mot.
+Le filtre de stock et les favoris seront ajoutés aux étapes suivantes.
+Les captures ci-dessus correspondent à la fin du TP 7.
