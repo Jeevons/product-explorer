@@ -1,10 +1,10 @@
 # Product Explorer
 
-Application Android réalisée avec Jetpack Compose pour les TP 4 à 8 (TP 8 en cours).
+Application Android réalisée avec Jetpack Compose pour les TP 4 à 8.
 Les cinq produits sont des exemples fictifs, écrits directement en Kotlin. Il n'y a pas de récupération sur Internet.
 
-Au lancement, l'application affiche le catalogue avec la recherche du TP 8. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
-Les boutons transmettent un callback au parent ; la navigation et les actions métier seront ajoutées dans les prochains TP.
+Au lancement, l'application affiche le catalogue interactif du TP 8. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
+La navigation vers le détail et la gestion du panier seront ajoutées dans les prochains TP.
 
 ## TP 4 : détail d'un produit
 
@@ -88,7 +88,7 @@ Le mode interactif des previews permet de faire défiler les écrans.
 <img src="images/accueil.png" alt="Accueil Product Explorer" width="300" />
 <img src="images/detail.png" alt="Détail d'un produit" width="300" />
 
-## TP 8 : catalogue interactif (en cours)
+## TP 8 : catalogue interactif
 
 ### Étape 1 : recherche locale
 
@@ -100,7 +100,6 @@ Le catalogue propose un champ `OutlinedTextField` pour chercher dans le nom, la 
 - La `LazyColumn` affiche maintenant `filteredProducts`.
 
 Une recherche vide affiche tous les produits. Si aucun produit ne correspond, un message invite à essayer un autre mot.
-Les favoris seront ajoutés à la prochaine étape.
 Les captures ci-dessus correspondent à la fin du TP 7.
 
 ### Étape 2 : stock et nombre de résultats
@@ -111,3 +110,14 @@ Un bouton permet d'afficher uniquement les produits dont le stock est supérieur
 Le calcul de `filteredProducts` dépend maintenant aussi de ce booléen. Un produit doit correspondre à la recherche **et** au filtre de stock pour être affiché.
 Le compteur utilise directement `filteredProducts.size`, sans créer un état supplémentaire.
 Quand le filtre est actif et qu'il n'y a aucun résultat, le message propose aussi de désactiver le filtre.
+
+### Étape 3 : favoris locaux
+
+Chaque carte propose un bouton « Ajouter aux favoris » ou « Retirer des favoris », accompagné d'un cœur vide ou plein.
+`favoriteProductIds` garde les identifiants des produits favoris dans une liste avec `rememberSaveable`.
+La fonction `toggleFavorite` crée une nouvelle liste en ajoutant ou en retirant l'identifiant du produit.
+
+L'état reste dans `ProductCatalogScreen` pour ce TP. `ProductListItem` reçoit seulement `isFavorite` et `onFavoriteClick` : la carte affiche la valeur reçue et transmet le clic à son parent.
+Un produit reste favori lorsqu'il est masqué puis réaffiché par la recherche ou le filtre de stock. Les favoris sont aussi conservés après une rotation, mais ne sont pas enregistrés durablement dans une base de données.
+
+Le TP 8 est terminé : recherche, filtre de stock, compteur et favoris fonctionnent ensemble. Le TP 9 servira à réorganiser la gestion de ces états avec le State Hoisting.
