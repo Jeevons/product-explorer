@@ -1,9 +1,9 @@
 # Product Explorer
 
-Application Android réalisée avec Jetpack Compose pour les TP 4 à 8.
+Application Android réalisée avec Jetpack Compose pour les TP 4 à 9 (TP 9 en cours).
 Les cinq produits sont des exemples fictifs, écrits directement en Kotlin. Il n'y a pas de récupération sur Internet.
 
-Au lancement, l'application affiche le catalogue interactif du TP 8. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
+Au lancement, l'application affiche le catalogue interactif réorganisé avec le State Hoisting du TP 9. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
 La navigation vers le détail et la gestion du panier seront ajoutées dans les prochains TP.
 
 ## TP 4 : détail d'un produit
@@ -52,7 +52,7 @@ Les composants utilisent les rôles de `MaterialTheme.colorScheme`, par exemple 
 Les catégories associent `secondaryContainer` et `onSecondaryContainer` pour rester lisibles dans les deux thèmes.
 
 `ProductTypography` règle quelques tailles et graisses de texte. `ProductShapes` centralise les arrondis, utilisés avec `MaterialTheme.shapes`.
-Les previews `ProductCatalogScreenLightPreview` et `ProductCatalogScreenDarkPreview` montrent le même catalogue dans les deux thèmes.
+Les previews montrent le même catalogue dans les deux thèmes. Depuis le TP 9, elles appellent `ProductCatalogContainer` et portent les noms `ProductCatalogContainerLightPreview` et `ProductCatalogContainerDarkPreview`.
 
 ## Petites personnalisations
 
@@ -67,11 +67,12 @@ Les previews `ProductCatalogScreenLightPreview` et `ProductCatalogScreenDarkPrev
 
 Tous les fichiers restent dans le package `com.example.productexplorer` :
 
-- `MainActivity.kt` appelle l'écran catalogue dans un `Scaffold`.
+- `MainActivity.kt` fournit les produits et catégories au conteneur dans un `Scaffold`.
 - `ProductData.kt` contient le modèle et les exemples de produits.
 - `ProductDetailScreen.kt` contient le détail et ses composants.
 - `ProductHomeScreen.kt` contient l'accueil et les catégories réutilisables.
-- `ProductCatalogScreen.kt` contient la liste et ses cartes.
+- `ProductCatalogContainer.kt` possède les états et la logique de filtrage.
+- `ProductCatalogScreen.kt` affiche la liste et ses cartes à partir des paramètres reçus.
 - `ui/theme` contient les couleurs, les formes et la typographie.
 
 ## Ouvrir le projet
@@ -121,3 +122,22 @@ L'état reste dans `ProductCatalogScreen` pour ce TP. `ProductListItem` reçoit 
 Un produit reste favori lorsqu'il est masqué puis réaffiché par la recherche ou le filtre de stock. Les favoris sont aussi conservés après une rotation, mais ne sont pas enregistrés durablement dans une base de données.
 
 Le TP 8 est terminé : recherche, filtre de stock, compteur et favoris fonctionnent ensemble. Le TP 9 servira à réorganiser la gestion de ces états avec le State Hoisting.
+
+## TP 9 : State Hoisting (en cours)
+
+### Étape 1 : remonter les états dans un parent
+
+`ProductCatalogContainer` est le composable **stateful** : il conserve `searchQuery`, `showOnlyInStock` et `favoriteProductIds` avec `rememberSaveable`. Il contient aussi le calcul de la liste filtrée et `toggleFavorite`.
+
+`ProductCatalogScreen` devient **stateless** : il reçoit la liste déjà filtrée, les catégories, les valeurs à afficher et les callbacks. Il ne contient plus les états du TP 8 ni le calcul du filtre.
+
+Par exemple, quand on écrit dans la recherche :
+
+1. Le champ appelle `onSearchQueryChange` avec le nouveau texte.
+2. Le conteneur modifie `searchQuery` et recalcule la liste.
+3. L'écran reçoit les nouvelles valeurs et les affiche.
+
+Les données descendent, les événements remontent. `ProductListItem` continue de recevoir `isFavorite` et `onFavoriteClick`, sans gérer lui-même la liste des favoris.
+
+`MainActivity` appelle maintenant le conteneur avec les données locales. Les deux previews clair/sombre appellent aussi ce conteneur pour conserver les interactions.
+La prochaine étape ajoutera des previews de l'écran stateless avec des valeurs fournies directement pour illustrer cette séparation.

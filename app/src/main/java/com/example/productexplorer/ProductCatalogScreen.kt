@@ -28,59 +28,26 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.productexplorer.ui.theme.ProductExplorerTheme
 
-// Ecran catalogue : une LazyColumn qui ne compose que ce qui est visible
+// Stateless : cet ecran recoit les valeurs et transmet les actions au parent.
 @Composable
 fun ProductCatalogScreen(
     products: List<ProductUi>,
+    categories: List<String>,
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    showOnlyInStock: Boolean,
+    onToggleStockFilter: () -> Unit,
+    favoriteProductIds: List<Int>,
+    onFavoriteClick: (Int) -> Unit,
     onProductClick: (ProductUi) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var searchQuery by rememberSaveable {
-        mutableStateOf("")
-    }
-
-    var showOnlyInStock by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var favoriteProductIds by rememberSaveable {
-        mutableStateOf(listOf<Int>())
-    }
-
-    fun toggleFavorite(productId: Int) {
-        // Une nouvelle liste permet a Compose de voir la modification.
-        favoriteProductIds = if (favoriteProductIds.contains(productId)) {
-            favoriteProductIds - productId
-        } else {
-            favoriteProductIds + productId
-        }
-    }
-
-    // La liste depend a la fois de la recherche et du filtre de stock.
-    val filteredProducts = remember(products, searchQuery, showOnlyInStock) {
-        products.filter { product ->
-            val matchesSearch =
-                product.title.contains(searchQuery, ignoreCase = true) ||
-                        product.brand.contains(searchQuery, ignoreCase = true) ||
-                        product.category.contains(searchQuery, ignoreCase = true)
-
-            val matchesStock = !showOnlyInStock || product.stock > 0
-
-            matchesSearch && matchesStock
-        }
-    }
-
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
@@ -98,9 +65,7 @@ fun ProductCatalogScreen(
         item {
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = { newValue ->
-                    searchQuery = newValue
-                },
+                onValueChange = onSearchQueryChange,
                 label = { Text(text = "Rechercher un produit") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
@@ -108,9 +73,7 @@ fun ProductCatalogScreen(
         }
         item {
             Button(
-                onClick = {
-                    showOnlyInStock = !showOnlyInStock
-                },
+                onClick = onToggleStockFilter,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
@@ -130,18 +93,18 @@ fun ProductCatalogScreen(
             )
         }
         item {
-            CategoryRow(categories = sampleCategories())
+            CategoryRow(categories = categories)
         }
 
         item {
             Text(
-                text = "${filteredProducts.size} produit(s) affiché(s)",
+                text = "${products.size} produit(s) affiché(s)",
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
 
-        if (filteredProducts.isEmpty()) {
+        if (products.isEmpty()) {
             item {
                 Text(
                     text = if (showOnlyInStock) {
@@ -157,14 +120,14 @@ fun ProductCatalogScreen(
 
         // key : chaque produit garde la meme identite meme si la liste change
         items(
-            items = filteredProducts,
+            items = products,
             key = { product -> product.id }
         ) { product ->
             ProductListItem(
                 product = product,
                 isFavorite = favoriteProductIds.contains(product.id),
                 onFavoriteClick = {
-                    toggleFavorite(product.id)
+                    onFavoriteClick(product.id)
                 },
                 onClick = {
                     onProductClick(product)
@@ -176,11 +139,12 @@ fun ProductCatalogScreen(
 
 @Preview(showBackground = true, name = "Catalogue clair", widthDp = 360, heightDp = 800)
 @Composable
-fun ProductCatalogScreenLightPreview() {
+fun ProductCatalogContainerLightPreview() {
     ProductExplorerTheme(darkTheme = false) {
         Scaffold { innerPadding ->
-            ProductCatalogScreen(
+            ProductCatalogContainer(
                 products = sampleProducts(),
+                categories = sampleCategories(),
                 onProductClick = {},
                 modifier = Modifier.padding(innerPadding)
             )
@@ -287,11 +251,12 @@ fun CategoryRow(
 
 @Preview(showBackground = true, name = "Catalogue sombre", widthDp = 360, heightDp = 800)
 @Composable
-fun ProductCatalogScreenDarkPreview() {
+fun ProductCatalogContainerDarkPreview() {
     ProductExplorerTheme(darkTheme = true) {
         Scaffold { innerPadding ->
-            ProductCatalogScreen(
+            ProductCatalogContainer(
                 products = sampleProducts(),
+                categories = sampleCategories(),
                 onProductClick = {},
                 modifier = Modifier.padding(innerPadding)
             )
