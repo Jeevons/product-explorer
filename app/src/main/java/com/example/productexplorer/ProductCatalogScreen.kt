@@ -263,3 +263,49 @@ fun ProductCatalogContainerDarkPreview() {
         }
     }
 }
+
+// Valeurs fixes : on peut montrer un favori sans passer par le conteneur.
+@Preview(showBackground = true, name = "Stateless - un favori", widthDp = 360, heightDp = 800)
+@Composable
+fun ProductCatalogScreenStatelessPreview() {
+    val product = sampleProduct()
+
+    ProductExplorerTheme(darkTheme = false) {
+        Scaffold { innerPadding ->
+            ProductCatalogScreen(
+                products = listOf(product),
+                categories = listOf("Smartphones"),
+                searchQuery = "Toto",
+                onSearchQueryChange = {},
+                showOnlyInStock = false,
+                onToggleStockFilter = {},
+                favoriteProductIds = listOf(product.id),
+                onFavoriteClick = {},
+                onProductClick = {},
+                modifier = Modifier.padding(innerPadding)
+            )
+        }
+    }
+}
+
+// Un autre jeu de valeurs suffit pour afficher le cas sans resultat.
+@Preview(showBackground = true, name = "Stateless - aucun resultat", widthDp = 360, heightDp = 800)
+@Composable
+fun ProductCatalogScreenEmptyPreview() {
+    ProductExplorerTheme(darkTheme = true) {
+        Scaffold { innerPadding ->
+            ProductCatalogScreen(
+                products = emptyList(),
+                categories = listOf("Audio"),
+                searchQuery = "casque",
+                onSearchQueryChange = {},
+                showOnlyInStock = true,
+                onToggleStockFilter = {},
+                favoriteProductIds = emptyList(),
+                onFavoriteClick = {},
+                onProductClick = {},
+                modifier = Modifier.padding(innerPadding)
+            )
+        }
+    }
+}

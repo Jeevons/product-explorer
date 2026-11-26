@@ -1,6 +1,6 @@
 # Product Explorer
 
-Application Android réalisée avec Jetpack Compose pour les TP 4 à 9 (TP 9 en cours).
+Application Android réalisée avec Jetpack Compose pour les TP 4 à 9.
 Les cinq produits sont des exemples fictifs, écrits directement en Kotlin. Il n'y a pas de récupération sur Internet.
 
 Au lancement, l'application affiche le catalogue interactif réorganisé avec le State Hoisting du TP 9. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
@@ -121,9 +121,9 @@ La fonction `toggleFavorite` crée une nouvelle liste en ajoutant ou en retirant
 L'état reste dans `ProductCatalogScreen` pour ce TP. `ProductListItem` reçoit seulement `isFavorite` et `onFavoriteClick` : la carte affiche la valeur reçue et transmet le clic à son parent.
 Un produit reste favori lorsqu'il est masqué puis réaffiché par la recherche ou le filtre de stock. Les favoris sont aussi conservés après une rotation, mais ne sont pas enregistrés durablement dans une base de données.
 
-Le TP 8 est terminé : recherche, filtre de stock, compteur et favoris fonctionnent ensemble. Le TP 9 servira à réorganiser la gestion de ces états avec le State Hoisting.
+Le TP 8 apporte la recherche, le filtre de stock, le compteur et les favoris. Le TP 9 ci-dessous réorganise la gestion de ces états avec le State Hoisting.
 
-## TP 9 : State Hoisting (en cours)
+## TP 9 : State Hoisting
 
 ### Étape 1 : remonter les états dans un parent
 
@@ -140,4 +140,16 @@ Par exemple, quand on écrit dans la recherche :
 Les données descendent, les événements remontent. `ProductListItem` continue de recevoir `isFavorite` et `onFavoriteClick`, sans gérer lui-même la liste des favoris.
 
 `MainActivity` appelle maintenant le conteneur avec les données locales. Les deux previews clair/sombre appellent aussi ce conteneur pour conserver les interactions.
-La prochaine étape ajoutera des previews de l'écran stateless avec des valeurs fournies directement pour illustrer cette séparation.
+
+### Étape 2 : prévisualiser l'écran stateless
+
+Deux previews supplémentaires, dans `ProductCatalogScreen.kt`, appellent directement `ProductCatalogScreen` avec des valeurs fixes :
+
+- `ProductCatalogScreenStatelessPreview` : recherche « Toto », un smartphone déjà favori et une seule catégorie.
+- `ProductCatalogScreenEmptyPreview` : recherche « casque », filtre de stock actif et liste vide en thème sombre.
+
+L'écran n'a pas besoin de connaître l'origine de ces valeurs pour les afficher. Les catégories viennent aussi des paramètres : chaque preview peut donc fournir sa propre liste.
+
+Dans ces deux exemples, les callbacks sont vides (`{}`) : la saisie et les clics ne changent pas les valeurs affichées. Pour tester les interactions, utiliser les previews `ProductCatalogContainerLightPreview` / `ProductCatalogContainerDarkPreview` en mode interactif, ou lancer l'application avec ▶.
+
+Le TP 9 est terminé : le conteneur possède les états, l'écran et les cartes affichent les données et transmettent les événements. La recherche, le filtre et les favoris gardent le comportement du TP 8.
