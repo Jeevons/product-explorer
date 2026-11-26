@@ -100,5 +100,14 @@ Le catalogue propose un champ `OutlinedTextField` pour chercher dans le nom, la 
 - La `LazyColumn` affiche maintenant `filteredProducts`.
 
 Une recherche vide affiche tous les produits. Si aucun produit ne correspond, un message invite à essayer un autre mot.
-Le filtre de stock et les favoris seront ajoutés aux étapes suivantes.
+Les favoris seront ajoutés à la prochaine étape.
 Les captures ci-dessus correspondent à la fin du TP 7.
+
+### Étape 2 : stock et nombre de résultats
+
+Un bouton permet d'afficher uniquement les produits dont le stock est supérieur à zéro, puis de revenir à tous les produits.
+`showOnlyInStock` est un booléen conservé avec `rememberSaveable`. Le clic inverse sa valeur avec `!showOnlyInStock`.
+
+Le calcul de `filteredProducts` dépend maintenant aussi de ce booléen. Un produit doit correspondre à la recherche **et** au filtre de stock pour être affiché.
+Le compteur utilise directement `filteredProducts.size`, sans créer un état supplémentaire.
+Quand le filtre est actif et qu'il n'y a aucun résultat, le message propose aussi de désactiver le filtre.

@@ -45,12 +45,21 @@ fun ProductCatalogScreen(
         mutableStateOf("")
     }
 
-    // La liste est recalculee quand les produits ou la recherche changent.
-    val filteredProducts = remember(products, searchQuery) {
+    var showOnlyInStock by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    // La liste depend a la fois de la recherche et du filtre de stock.
+    val filteredProducts = remember(products, searchQuery, showOnlyInStock) {
         products.filter { product ->
-            product.title.contains(searchQuery, ignoreCase = true) ||
-                    product.brand.contains(searchQuery, ignoreCase = true) ||
-                    product.category.contains(searchQuery, ignoreCase = true)
+            val matchesSearch =
+                product.title.contains(searchQuery, ignoreCase = true) ||
+                        product.brand.contains(searchQuery, ignoreCase = true) ||
+                        product.category.contains(searchQuery, ignoreCase = true)
+
+            val matchesStock = !showOnlyInStock || product.stock > 0
+
+            matchesSearch && matchesStock
         }
     }
 
@@ -80,6 +89,22 @@ fun ProductCatalogScreen(
             )
         }
         item {
+            Button(
+                onClick = {
+                    showOnlyInStock = !showOnlyInStock
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = if (showOnlyInStock) {
+                        "Afficher tous les produits"
+                    } else {
+                        "Afficher uniquement les produits en stock"
+                    }
+                )
+            }
+        }
+        item {
             Text(
                 text = "Une sélection tech et maison pour le quotidien.",
                 color = MaterialTheme.colorScheme.onBackground,
@@ -90,10 +115,22 @@ fun ProductCatalogScreen(
             CategoryRow(categories = sampleCategories())
         }
 
+        item {
+            Text(
+                text = "${filteredProducts.size} produit(s) affiché(s)",
+                color = MaterialTheme.colorScheme.onBackground,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+
         if (filteredProducts.isEmpty()) {
             item {
                 Text(
-                    text = "Aucun produit trouvé. Essayez un autre mot.",
+                    text = if (showOnlyInStock) {
+                        "Aucun produit en stock ne correspond. Modifiez la recherche ou désactivez le filtre."
+                    } else {
+                        "Aucun produit trouvé. Essayez un autre mot."
+                    },
                     color = MaterialTheme.colorScheme.onBackground,
                     style = MaterialTheme.typography.bodyMedium
                 )
