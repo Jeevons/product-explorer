@@ -1,6 +1,6 @@
 # Product Explorer
 
-Application Android réalisée avec Jetpack Compose pour les TP 4 à 9.
+Application Android réalisée avec Jetpack Compose pour les TP 4 à 10 (TP 10 en cours).
 Les cinq produits sont des exemples fictifs, écrits directement en Kotlin. Il n'y a pas de récupération sur Internet.
 
 Au lancement, l'application affiche le catalogue interactif réorganisé avec le State Hoisting du TP 9. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
@@ -71,7 +71,8 @@ Tous les fichiers restent dans le package `com.example.productexplorer` :
 - `ProductData.kt` contient le modèle et les exemples de produits.
 - `ProductDetailScreen.kt` contient le détail et ses composants.
 - `ProductHomeScreen.kt` contient l'accueil et les catégories réutilisables.
-- `ProductCatalogContainer.kt` possède les états et la logique de filtrage.
+- `ProductCatalogContainer.kt` possède les états et la logique de filtrage depuis le TP 9.
+- `ProductCatalogViewModel.kt` prépare leur déplacement dans un ViewModel au TP 10 ; il sera relié à l'écran à l'étape suivante.
 - `ProductCatalogScreen.kt` affiche la liste et ses cartes à partir des paramètres reçus.
 - `ui/theme` contient les couleurs, les formes et la typographie.
 
@@ -153,3 +154,17 @@ L'écran n'a pas besoin de connaître l'origine de ces valeurs pour les afficher
 Dans ces deux exemples, les callbacks sont vides (`{}`) : la saisie et les clics ne changent pas les valeurs affichées. Pour tester les interactions, utiliser les previews `ProductCatalogContainerLightPreview` / `ProductCatalogContainerDarkPreview` en mode interactif, ou lancer l'application avec ▶.
 
 Le TP 9 est terminé : le conteneur possède les états, l'écran et les cartes affichent les données et transmettent les événements. La recherche, le filtre et les favoris gardent le comportement du TP 8.
+
+## TP 10 : ViewModel (en cours)
+
+### Étape 1 : préparer et tester le ViewModel
+
+`ProductCatalogViewModel` hérite de `ViewModel`. Cette classe contient les données locales, les états de recherche, de filtre et de favoris, ainsi que les fonctions qui les modifient.
+
+Les propriétés d'état utilisent `mutableStateOf` avec `private set` : l'interface pourra les lire, mais devra appeler `onSearchQueryChange`, `onToggleStockFilter` ou `onFavoriteClick` pour demander un changement.
+`filteredProducts` utilise un getter (`get()`) pour calculer la liste à partir de la recherche et du filtre actuels.
+
+La dépendance `lifecycle-viewmodel-compose` est ajoutée au Version Catalog avec la version Lifecycle déjà utilisée dans le projet.
+Trois tests unitaires vérifient la recherche, la combinaison recherche/stock et la conservation des favoris quand des produits sont masqués par les filtres.
+
+À cette étape, le ViewModel est préparé mais pas encore utilisé par l'application. Le conteneur du TP 9 continue de gérer l'écran jusqu'au prochain commit, qui branchera le ViewModel avec `viewModel()`.
