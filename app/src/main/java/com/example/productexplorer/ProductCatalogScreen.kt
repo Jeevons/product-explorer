@@ -139,12 +139,18 @@ fun ProductCatalogScreen(
 
 @Preview(showBackground = true, name = "Catalogue clair", widthDp = 360, heightDp = 800)
 @Composable
-fun ProductCatalogContainerLightPreview() {
+fun ProductCatalogScreenLightPreview() {
     ProductExplorerTheme(darkTheme = false) {
         Scaffold { innerPadding ->
-            ProductCatalogContainer(
+            ProductCatalogScreen(
                 products = sampleProducts(),
                 categories = sampleCategories(),
+                searchQuery = "",
+                onSearchQueryChange = {},
+                showOnlyInStock = false,
+                onToggleStockFilter = {},
+                favoriteProductIds = listOf(1),
+                onFavoriteClick = {},
                 onProductClick = {},
                 modifier = Modifier.padding(innerPadding)
             )
@@ -251,12 +257,18 @@ fun CategoryRow(
 
 @Preview(showBackground = true, name = "Catalogue sombre", widthDp = 360, heightDp = 800)
 @Composable
-fun ProductCatalogContainerDarkPreview() {
+fun ProductCatalogScreenDarkPreview() {
     ProductExplorerTheme(darkTheme = true) {
         Scaffold { innerPadding ->
-            ProductCatalogContainer(
+            ProductCatalogScreen(
                 products = sampleProducts(),
                 categories = sampleCategories(),
+                searchQuery = "",
+                onSearchQueryChange = {},
+                showOnlyInStock = false,
+                onToggleStockFilter = {},
+                favoriteProductIds = listOf(1),
+                onFavoriteClick = {},
                 onProductClick = {},
                 modifier = Modifier.padding(innerPadding)
             )

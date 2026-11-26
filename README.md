@@ -1,9 +1,9 @@
 # Product Explorer
 
-Application Android réalisée avec Jetpack Compose pour les TP 4 à 10 (TP 10 en cours).
+Application Android réalisée avec Jetpack Compose pour les TP 4 à 10.
 Les cinq produits sont des exemples fictifs, écrits directement en Kotlin. Il n'y a pas de récupération sur Internet.
 
-Au lancement, l'application affiche le catalogue interactif réorganisé avec le State Hoisting du TP 9. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
+Au lancement, l'application affiche le catalogue interactif dont l'état est géré par le ViewModel du TP 10. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
 La navigation vers le détail et la gestion du panier seront ajoutées dans les prochains TP.
 
 ## TP 4 : détail d'un produit
@@ -52,7 +52,7 @@ Les composants utilisent les rôles de `MaterialTheme.colorScheme`, par exemple 
 Les catégories associent `secondaryContainer` et `onSecondaryContainer` pour rester lisibles dans les deux thèmes.
 
 `ProductTypography` règle quelques tailles et graisses de texte. `ProductShapes` centralise les arrondis, utilisés avec `MaterialTheme.shapes`.
-Les previews montrent le même catalogue dans les deux thèmes. Depuis le TP 9, elles appellent `ProductCatalogContainer` et portent les noms `ProductCatalogContainerLightPreview` et `ProductCatalogContainerDarkPreview`.
+Les previews `ProductCatalogScreenLightPreview` et `ProductCatalogScreenDarkPreview` montrent le même catalogue dans les deux thèmes. Depuis le TP 10, elles appellent directement l’écran stateless avec des données fixes, sans ViewModel.
 
 ## Petites personnalisations
 
@@ -67,12 +67,12 @@ Les previews montrent le même catalogue dans les deux thèmes. Depuis le TP 9, 
 
 Tous les fichiers restent dans le package `com.example.productexplorer` :
 
-- `MainActivity.kt` fournit les produits et catégories au conteneur dans un `Scaffold`.
+- `MainActivity.kt` affiche le conteneur dans un `Scaffold`.
 - `ProductData.kt` contient le modèle et les exemples de produits.
 - `ProductDetailScreen.kt` contient le détail et ses composants.
 - `ProductHomeScreen.kt` contient l'accueil et les catégories réutilisables.
-- `ProductCatalogContainer.kt` possède les états et la logique de filtrage depuis le TP 9.
-- `ProductCatalogViewModel.kt` prépare leur déplacement dans un ViewModel au TP 10 ; il sera relié à l'écran à l'étape suivante.
+- `ProductCatalogContainer.kt` récupère le ViewModel et transmet ses valeurs et fonctions à l’écran.
+- `ProductCatalogViewModel.kt` possède les données locales, les états et la logique de filtrage.
 - `ProductCatalogScreen.kt` affiche la liste et ses cartes à partir des paramètres reçus.
 - `ui/theme` contient les couleurs, les formes et la typographie.
 
@@ -140,7 +140,7 @@ Par exemple, quand on écrit dans la recherche :
 
 Les données descendent, les événements remontent. `ProductListItem` continue de recevoir `isFavorite` et `onFavoriteClick`, sans gérer lui-même la liste des favoris.
 
-`MainActivity` appelle maintenant le conteneur avec les données locales. Les deux previews clair/sombre appellent aussi ce conteneur pour conserver les interactions.
+À la fin du TP 9, `MainActivity` fournissait les données locales au conteneur et les deux previews clair/sombre appelaient ce conteneur. Le TP 10 ci-dessous déplace les données dans le ViewModel et adapte ces previews.
 
 ### Étape 2 : prévisualiser l'écran stateless
 
@@ -151,11 +151,11 @@ Deux previews supplémentaires, dans `ProductCatalogScreen.kt`, appellent direct
 
 L'écran n'a pas besoin de connaître l'origine de ces valeurs pour les afficher. Les catégories viennent aussi des paramètres : chaque preview peut donc fournir sa propre liste.
 
-Dans ces deux exemples, les callbacks sont vides (`{}`) : la saisie et les clics ne changent pas les valeurs affichées. Pour tester les interactions, utiliser les previews `ProductCatalogContainerLightPreview` / `ProductCatalogContainerDarkPreview` en mode interactif, ou lancer l'application avec ▶.
+Dans ces deux exemples, les callbacks sont vides (`{}`) : la saisie et les clics ne changent pas les valeurs affichées. Depuis le TP 10, les previews clair/sombre utilisent aussi des valeurs fixes. Pour tester les interactions, lancer l'application avec ▶.
 
 Le TP 9 est terminé : le conteneur possède les états, l'écran et les cartes affichent les données et transmettent les événements. La recherche, le filtre et les favoris gardent le comportement du TP 8.
 
-## TP 10 : ViewModel (en cours)
+## TP 10 : ViewModel
 
 ### Étape 1 : préparer et tester le ViewModel
 
@@ -167,4 +167,18 @@ Les propriétés d'état utilisent `mutableStateOf` avec `private set` : l'inter
 La dépendance `lifecycle-viewmodel-compose` est ajoutée au Version Catalog avec la version Lifecycle déjà utilisée dans le projet.
 Trois tests unitaires vérifient la recherche, la combinaison recherche/stock et la conservation des favoris quand des produits sont masqués par les filtres.
 
-À cette étape, le ViewModel est préparé mais pas encore utilisé par l'application. Le conteneur du TP 9 continue de gérer l'écran jusqu'au prochain commit, qui branchera le ViewModel avec `viewModel()`.
+Ce premier commit préparait le ViewModel et ses tests. Son branchement à l'application est réalisé à l'étape 2.
+
+### Étape 2 : relier le ViewModel à l'interface
+
+`ProductCatalogContainer` récupère le ViewModel avec `viewModel()`, puis transmet ses valeurs à `ProductCatalogScreen`.
+Les callbacks utilisent des références de fonctions, par exemple `viewModel::onSearchQueryChange` : cela signifie que le champ doit appeler cette fonction du ViewModel quand le texte change.
+
+Le conteneur ne possède plus les états, le calcul de la liste filtrée ni la modification des favoris. `MainActivity` appelle seulement le conteneur : les produits et catégories sont maintenant chargés dans le ViewModel.
+`ProductCatalogScreen` et `ProductListItem` restent stateless.
+
+Les previews `ProductCatalogScreenLightPreview` et `ProductCatalogScreenDarkPreview` appellent directement l'écran avec les mêmes données fixes. Les deux exemples stateless du TP 9 sont aussi conservés.
+Les previews servent à vérifier l'affichage ; pour saisir une recherche, filtrer ou modifier les favoris, lancer l'application avec ▶.
+
+Le ViewModel conserve ses états quand l'activité est recréée lors d'une rotation. Ces données restent en mémoire, sans sauvegarde durable.
+Le TP 10 est terminé. Le TP 11 fera évoluer le ViewModel vers un état d'écran unique exposé avec `StateFlow`.
