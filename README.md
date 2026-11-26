@@ -1,6 +1,6 @@
 # Product Explorer
 
-Application Android réalisée avec Jetpack Compose pour les TP 4 à 10.
+Application Android réalisée avec Jetpack Compose pour les TP 4 à 11 (TP 11 en cours).
 Les cinq produits sont des exemples fictifs, écrits directement en Kotlin. Il n'y a pas de récupération sur Internet.
 
 Au lancement, l'application affiche le catalogue interactif dont l'état est géré par le ViewModel du TP 10. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
@@ -73,6 +73,7 @@ Tous les fichiers restent dans le package `com.example.productexplorer` :
 - `ProductHomeScreen.kt` contient l'accueil et les catégories réutilisables.
 - `ProductCatalogContainer.kt` récupère le ViewModel et transmet ses valeurs et fonctions à l’écran.
 - `ProductCatalogViewModel.kt` possède les données locales, les états et la logique de filtrage.
+- `ProductCatalogUiState.kt` définit les cinq valeurs qui formeront l’état unique du catalogue au TP 11.
 - `ProductCatalogScreen.kt` affiche la liste et ses cartes à partir des paramètres reçus.
 - `ui/theme` contient les couleurs, les formes et la typographie.
 
@@ -182,3 +183,20 @@ Les previews servent à vérifier l'affichage ; pour saisir une recherche, filtr
 
 Le ViewModel conserve ses états quand l'activité est recréée lors d'une rotation. Ces données restent en mémoire, sans sauvegarde durable.
 Le TP 10 est terminé. Le TP 11 fera évoluer le ViewModel vers un état d'écran unique exposé avec `StateFlow`.
+
+## TP 11 : StateFlow (en cours)
+
+### Étape 1 : décrire l'état complet du catalogue
+
+`ProductCatalogUiState` est une `data class` qui regroupe les informations à afficher :
+
+- `products` : la liste des produits affichés, après application des filtres ;
+- `categories` : les catégories du catalogue ;
+- `searchQuery` : le texte de recherche ;
+- `showOnlyInStock` : l'activation du filtre de stock ;
+- `favoriteProductIds` : les identifiants des produits favoris.
+
+Les valeurs par défaut décrivent un écran vide, sans recherche, filtre ni favori. Les propriétés sont déclarées avec `val` : pour faire évoluer l'état, on créera une nouvelle version avec `copy` à l'étape suivante.
+
+Cette classe ne filtre pas les produits et ne gère pas les clics. Elle décrit les valeurs de l'écran. Le ViewModel continuera de porter la logique.
+À cette étape, l'application utilise encore les états séparés du TP 10. La prochaine étape les remplacera par un `StateFlow<ProductCatalogUiState>`, observé par le conteneur avec `collectAsState()`.
