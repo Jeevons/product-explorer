@@ -1,9 +1,9 @@
 # Product Explorer
 
-Application Android réalisée avec Jetpack Compose pour les TP 4 à 11 (TP 11 en cours).
+Application Android réalisée avec Jetpack Compose pour les TP 4 à 11.
 Les cinq produits sont des exemples fictifs, écrits directement en Kotlin. Il n'y a pas de récupération sur Internet.
 
-Au lancement, l'application affiche le catalogue interactif dont l'état est géré par le ViewModel du TP 10. L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
+Au lancement, l'application affiche le catalogue interactif dont le ViewModel publie l'état avec StateFlow (TP 11). L'accueil du TP 5 et le détail du TP 4 restent dans le projet et se consultent avec leurs previews.
 La navigation vers le détail et la gestion du panier seront ajoutées dans les prochains TP.
 
 ## TP 4 : détail d'un produit
@@ -71,9 +71,9 @@ Tous les fichiers restent dans le package `com.example.productexplorer` :
 - `ProductData.kt` contient le modèle et les exemples de produits.
 - `ProductDetailScreen.kt` contient le détail et ses composants.
 - `ProductHomeScreen.kt` contient l'accueil et les catégories réutilisables.
-- `ProductCatalogContainer.kt` récupère le ViewModel et transmet ses valeurs et fonctions à l’écran.
-- `ProductCatalogViewModel.kt` possède les données locales, les états et la logique de filtrage.
-- `ProductCatalogUiState.kt` définit les cinq valeurs qui formeront l’état unique du catalogue au TP 11.
+- `ProductCatalogContainer.kt` collecte le StateFlow du ViewModel et transmet ses valeurs et fonctions à l’écran.
+- `ProductCatalogViewModel.kt` possède les données locales, la logique de filtrage et le StateFlow de l’état UI.
+- `ProductCatalogUiState.kt` regroupe les cinq valeurs de l’état UI du catalogue.
 - `ProductCatalogScreen.kt` affiche la liste et ses cartes à partir des paramètres reçus.
 - `ui/theme` contient les couleurs, les formes et la typographie.
 
@@ -162,8 +162,7 @@ Le TP 9 est terminé : le conteneur possède les états, l'écran et les cartes 
 
 `ProductCatalogViewModel` hérite de `ViewModel`. Cette classe contient les données locales, les états de recherche, de filtre et de favoris, ainsi que les fonctions qui les modifient.
 
-Les propriétés d'état utilisent `mutableStateOf` avec `private set` : l'interface pourra les lire, mais devra appeler `onSearchQueryChange`, `onToggleStockFilter` ou `onFavoriteClick` pour demander un changement.
-`filteredProducts` utilise un getter (`get()`) pour calculer la liste à partir de la recherche et du filtre actuels.
+Au TP 10, les propriétés d’état utilisaient `mutableStateOf` avec `private set`, et `filteredProducts` était calculée avec un getter (`get()`). L’interface appelait `onSearchQueryChange`, `onToggleStockFilter` ou `onFavoriteClick` pour demander un changement. Ces actions sont conservées au TP 11, qui remplace les propriétés séparées par un état unique.
 
 La dépendance `lifecycle-viewmodel-compose` est ajoutée au Version Catalog avec la version Lifecycle déjà utilisée dans le projet.
 Trois tests unitaires vérifient la recherche, la combinaison recherche/stock et la conservation des favoris quand des produits sont masqués par les filtres.
@@ -182,9 +181,9 @@ Les previews `ProductCatalogScreenLightPreview` et `ProductCatalogScreenDarkPrev
 Les previews servent à vérifier l'affichage ; pour saisir une recherche, filtrer ou modifier les favoris, lancer l'application avec ▶.
 
 Le ViewModel conserve ses états quand l'activité est recréée lors d'une rotation. Ces données restent en mémoire, sans sauvegarde durable.
-Le TP 10 est terminé. Le TP 11 fera évoluer le ViewModel vers un état d'écran unique exposé avec `StateFlow`.
+Le TP 10 est terminé. Le TP 11 ci-dessous fait évoluer le ViewModel vers un état d’écran unique exposé avec `StateFlow`.
 
-## TP 11 : StateFlow (en cours)
+## TP 11 : StateFlow
 
 ### Étape 1 : décrire l'état complet du catalogue
 
@@ -196,7 +195,24 @@ Le TP 10 est terminé. Le TP 11 fera évoluer le ViewModel vers un état d'écra
 - `showOnlyInStock` : l'activation du filtre de stock ;
 - `favoriteProductIds` : les identifiants des produits favoris.
 
-Les valeurs par défaut décrivent un écran vide, sans recherche, filtre ni favori. Les propriétés sont déclarées avec `val` : pour faire évoluer l'état, on créera une nouvelle version avec `copy` à l'étape suivante.
+Les valeurs par défaut décrivent un écran vide, sans recherche, filtre ni favori. Les propriétés sont déclarées avec `val` : pour faire évoluer l'état, les actions de l'étape 2 créent une nouvelle version avec `copy`.
 
-Cette classe ne filtre pas les produits et ne gère pas les clics. Elle décrit les valeurs de l'écran. Le ViewModel continuera de porter la logique.
-À cette étape, l'application utilise encore les états séparés du TP 10. La prochaine étape les remplacera par un `StateFlow<ProductCatalogUiState>`, observé par le conteneur avec `collectAsState()`.
+Cette classe ne filtre pas les produits et ne gère pas les clics. Elle décrit les valeurs de l'écran. Le ViewModel porte la logique.
+Le premier commit définissait cette classe ; le deuxième la relie au ViewModel et à l'interface.
+
+### Étape 2 : publier et observer l'état avec StateFlow
+
+Le ViewModel possède un `_uiState` privé de type `MutableStateFlow`. L'interface accède seulement à `uiState`, exposé en lecture seule avec `asStateFlow()`.
+
+Les trois actions utilisent `update` et `copy` pour produire un nouvel état :
+
+- La recherche modifie le texte et recalcule les produits avec le filtre de stock actuel.
+- Le filtre inverse sa valeur et recalcule les produits avec la recherche actuelle.
+- Un clic sur favori modifie la liste des identifiants en conservant les autres valeurs.
+
+`filterProducts` reste une fonction privée du ViewModel. `ProductCatalogContainer` observe le flux avec `val uiState by viewModel.uiState.collectAsState()` et fournit ses valeurs à l'écran.
+`ProductCatalogScreen` reçoit toujours les mêmes paramètres : il ne connaît ni le ViewModel ni StateFlow. Les previews utilisent toujours des données fixes.
+
+Les tests vérifient les recherches, les filtres combinés et les favoris à travers `uiState.value`. Ils contrôlent aussi que les mises à jour conservent les autres valeurs et ne modifient pas un ancien état déjà obtenu.
+
+Le TP 11 est terminé : le ViewModel publie un état, Compose l'observe et l'interface se met à jour. Les données restent locales.
